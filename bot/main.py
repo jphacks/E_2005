@@ -41,7 +41,29 @@ def callback():
 
 @handler.add(MessageEvent)
 def handle_message(event):
-    message = TextSendMessage(text=event.message.text)
+    event_type = event.source.type
+    if (event_type == 'user'):
+        sender_id = event.source.userId
+
+    elif (event_type == 'group'):
+        sender_id = event.source.groupId
+
+    elif (event_type == 'room'):
+        sender_id = event.source.roomId
+
+    print(sender_id)
+
+    db_user = User.query.filter_by(user_id=sender_id).all()
+    if (db_user is None):
+        new_user = User(user_id=sender_id, raspi_id=event.message.text)
+        db.session.add(new_user)
+        db.session.commit()
+
+        message = TextSendMessage(text="ラズパイIDを登録しました")
+        print(User.query.all())
+
+    else:
+        message = TextSendMessage(text="ラズパイIDはNoneじゃないです")
 
     line_bot_api.reply_message(
         event.reply_token,
