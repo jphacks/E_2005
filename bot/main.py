@@ -68,8 +68,10 @@ def handle_message(event):
     if event.message.text == "bye":
         if event_type == 'group':
             line_bot_api.leave_group(sender_id)
+            User.query.filter(User.user_id==sender_id).delete()
         elif event_type == 'room':
             line_bot_api.leave_room(sender_id)
+            User.query.filter(User.user_id==sender_id).delete()
 
     line_bot_api.reply_message(
         event.reply_token,
