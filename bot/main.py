@@ -1,5 +1,6 @@
 from flask import Flask, request, abort
 from bot import app, db
+from bot.models import User
 
 from linebot import (
     LineBotApi,
@@ -9,7 +10,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent,
+    MessageEvent, FollowEvent, JoinEvent,
     TextSendMessage
 )
 import os
@@ -20,17 +21,6 @@ LINE_CHANNEL_SECRET = os.environ["LINE_CHANNEL_SECRET"]
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
-'''
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    line_id = db.Column(db.String, unique=False)
-    raspi_id = 
-
-
-    def __init__(self, user_id):
-        self.user_id = user_id
-'''
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -58,6 +48,21 @@ def handle_message(event):
         message
     )
 
+@handler.add(FollowEvent)
+def handle_follow(event):
+    message = TextSendMessage(text="ラズパイIDを入力してください")
+    line_bot_api.reply_message(
+        event.reply_token,
+        message
+    )
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    message = TextSendMessage(text="ラズパイIDを入力してください")
+    line_bot_api.reply_message(
+        event.reply_token,
+        message
+    )
 
 if __name__ == "__main__":
     print("Please run run.py")
