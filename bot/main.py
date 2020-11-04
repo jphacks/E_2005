@@ -1,5 +1,5 @@
 from flask import Flask, request, abort
-from bot import app
+from bot import app, db
 
 from linebot import (
     LineBotApi,
