@@ -12,12 +12,6 @@ from linebot.models import (
     TextSendMessage
 )
 import os
-import random
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-#db = SQLAlchemy(app)
 
 #環境変数取得
 LINE_CHANNEL_ACCESS_TOKEN = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
@@ -65,7 +59,4 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-#    app.run()
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
+    print("Please run run.py")
