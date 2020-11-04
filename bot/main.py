@@ -64,6 +64,7 @@ def handle_message(event):
 
     else:
         user = User.query.filter(User.user_id==sender_id).one()
+        print(user)
         message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
 
     if event.message.text == "bye":
