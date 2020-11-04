@@ -65,6 +65,12 @@ def handle_message(event):
     else:
         message = TextSendMessage(text="ラズパイIDはNoneじゃないです")
 
+    if event.message.text == "bye":
+        if event_type == 'group':
+            line_bot_api.leave_group(sender_id)
+        elif eventtype == 'room':
+            line_bot_api.leave_room(sender_id)
+
     line_bot_api.reply_message(
         event.reply_token,
         message
