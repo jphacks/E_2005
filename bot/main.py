@@ -43,13 +43,13 @@ def callback():
 def handle_message(event):
     event_type = event.source.type
     if (event_type == 'user'):
-        sender_id = event.source.userId
+        sender_id = event.source.user_id
 
     elif (event_type == 'group'):
-        sender_id = event.source.groupId
+        sender_id = event.source.group_id
 
     elif (event_type == 'room'):
-        sender_id = event.source.roomId
+        sender_id = event.source.room_id
 
     print(sender_id)
 
