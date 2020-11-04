@@ -54,7 +54,7 @@ def handle_message(event):
     print(sender_id)
 
     db_user = User.query.filter_by(user_id=sender_id).all()
-    if (db_user is None):
+    if (db_user == []):
         new_user = User(user_id=sender_id, raspi_id=event.message.text)
         db.session.add(new_user)
         db.session.commit()
