@@ -63,7 +63,8 @@ def handle_message(event):
         print(User.query.all())
 
     else:
-        message = TextSendMessage(text="ラズパイIDはNoneじゃないです")
+        user = User.query.filter(User.user_id==sender_id).all()
+        message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
 
     if event.message.text == "bye":
         if event_type == 'group':
