@@ -68,7 +68,7 @@ def handle_message(event):
     if event.message.text == "bye":
         if event_type == 'group':
             line_bot_api.leave_group(sender_id)
-        elif eventtype == 'room':
+        elif event_type == 'room':
             line_bot_api.leave_room(sender_id)
 
     line_bot_api.reply_message(
