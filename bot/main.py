@@ -74,17 +74,17 @@ def handle_message(event):
             message = TextSendMessage(text="使用者の名前とラズパイIDを「、」区切りで入力してください\n(例)おばあちゃん、12345")
 
         elif event.message.text == "削除":
-            text="削除したいラズパイIDを入力してください\n"
             raspis = User.query.filter_by(line_id=sender_id).all()
 
             if raspis == []:
-                text += "登録しているラズパイはありません"
+                text = "登録しているラズパイはありません"
+                status = 0
             else:
-                text += "登録しているラズパイ一覧"
+                text = "削除したいラズパイIDを入力してください\n登録しているラズパイ一覧"
                 for raspi in raspis:
                     text += ("\n名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id)
+                status = 2
 
-            status = 2
             message = TextSendMessage(text=text)
 
         elif event.message.text == "確認":
