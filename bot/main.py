@@ -68,16 +68,17 @@ def handle_message(event):
         message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
 
     if event.message.text == "bye":
+        User.query.filter(User.user_id==sender_id).delete()
+        db.session.commit()
+
         if event_type == 'group':
-            User.query.filter(User.user_id==sender_id).delete()
-            db.session.commit()
             line_bot_api.leave_group(sender_id)
             return
         elif event_type == 'room':
-            User.query.filter(User.user_id==sender_id).delete()
-            db.session.commit()
             line_bot_api.leave_room(sender_id)
             return
+        elif event_type == 'user':
+            message = TextSendMessage(text="ラズパイIDを削除しました")
 
     line_bot_api.reply_message(
         event.reply_token,
