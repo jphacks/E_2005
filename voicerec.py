@@ -12,9 +12,14 @@ def transcribe_file():
         sample_rate_hertz=44100,
         language_code='ja-JP',
         audio_channel_count=1,
-        enable_separate_recognition_per_channel=True)
+        enable_separate_recognition_per_channel=True
+    )
 
-    response = client.recognize(config=config, audio=audio)
+    operation = client.long_running_recognize(
+        request={"config": config, "audio": audio}
+    )
+    operation = client.long_running_recognize(config=config, audio=audio)
+    response = operation.result(timeout=90)
 
     with io.open("proken.txt", "w", encoding="utf-8") as f:
         for result in response.results:
