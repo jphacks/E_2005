@@ -81,7 +81,7 @@ def handle_message(event):
             raspis = User.query.filter_by(line_id=sender_id).all()
             text = "登録しているラズパイ一覧\n"
             for raspi in raspis:
-                test += ("名前:" + raspi[0] + " ラズパイID:" + raspi[1] + "\n")
+                text += ("名前:" + raspi[0] + " ラズパイID:" + raspi[1] + "\n")
             message = TextSendMessage(text=text)
 
         else:
@@ -114,7 +114,7 @@ def handle_follow(event):
     db.session.add(status)
     db.session.commit()
 
-    message = TextSendMessage(text="ラズパイIDを入力してください")
+    message = TextSendMessage(text="こんにちは")
     line_bot_api.reply_message(
         event.reply_token,
         message
