@@ -113,12 +113,17 @@ def handle_message(event):
 
     elif sender.line_status == 1:
         raspi = event.message.text.split('、')
-        new_user = User(line_id=sender_id, user_name=raspi[0], raspi_id=raspi[1])
-        db.session.add(new_user)
-        db.session.commit()
 
+        if len(raspi) == 2:
+            new_user = User(line_id=sender_id, user_name=raspi[0], raspi_id=raspi[1])
+            db.session.add(new_user)
+            db.session.commit()
+
+            message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
+        else:
+            message = TextSendMessage(text="指定した形で入力してください")
+        
         status = 0
-        message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
 
     elif sender.line_status == 2:
         message = TextSendMessage(text=event.message.text + "を削除しました")
