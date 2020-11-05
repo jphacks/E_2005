@@ -88,7 +88,9 @@ def handle_message(event):
         status = 0
         message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
 
-    elif (sender.user_status == 2):
+    else:
+        return
+    # elif (sender.user_status == 2):
 
     # db_user = User.query.filter_by(user_id=sender_id).all()
     # if (db_user == []):
