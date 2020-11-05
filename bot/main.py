@@ -1,6 +1,6 @@
 from flask import Flask, request, abort
 from bot import app, db
-from bot.models import User
+from bot.models import User, Status
 
 from linebot import (
     LineBotApi,
