@@ -79,18 +79,35 @@ def handle_message(event):
 
         elif event.message.text == "確認":
             raspis = User.query.filter_by(line_id=sender_id).all()
-            text = "登録しているラズパイ一覧\n"
+            text = "登録しているラズパイ一覧"
             for raspi in raspis:
-                text += ("名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id + "\n")
+                text += ("\n名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id)
 
             status = 0
             message = TextSendMessage(text=text)
 
+        elif event.message.text == "バイバイ":
+            if event_type == 'group':
+                User.query.filter(User.line_id==sender_id).delete()
+                db.session.commit()
+                line_bot_api.leave_group(sender_id)
+                return
+            elif event_type == 'room':
+                User.query.filter(User.line_id==sender_id).delete()
+                db.session.commit()
+                line_bot_api.leave_room(sender_id)
+                return
+
         else:
             status = 0
-            message = TextSendMessage(text="通常メッセージ")
+            text = "ラズパイIDを登録したいときは「登録」\n確認したいときは「確認」\n削除したいときは「削除」"
+            if event_type == 'group' or event_type == 'room':
+                text += "\n退会させたい時は「バイバイ」"
+            text = "\nと入力してください"
 
-    elif (sender.line_status == 1):
+            message = TextSendMessage(text=text)
+
+    elif sender.line_status == 1:
         raspi = event.message.text.split('、')
         new_user = User(line_id=sender_id, user_name=raspi[0], raspi_id=raspi[1])
         db.session.add(new_user)
@@ -98,6 +115,10 @@ def handle_message(event):
 
         status = 0
         message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
+
+    elif sender.line_status == 2:
+        User.query.filter(User.raspi_id==event.message.text).delete()
+        db.session.commit()
 
     else:
         return
