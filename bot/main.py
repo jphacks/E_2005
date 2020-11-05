@@ -88,7 +88,7 @@ def handle_message(event):
             status = 0
             message = TextSendMessage(text="通常メッセージ")
 
-    elif (sender.user_status == 1):
+    elif (sender.line_status == 1):
         raspi = event.message.text.split('、')
         new_user = User(line_id=sender_id, user_name=raspi[0], raspi_id=raspi[1])
         db.session.add(new_user)
