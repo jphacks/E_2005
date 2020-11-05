@@ -78,7 +78,8 @@ def handle_message(event):
             line_bot_api.leave_room(sender_id)
             return
         elif event_type == 'user':
-            message = TextSendMessage(text="ラズパイIDを削除しました")
+            message = TextSendMessage(text="ラズパイIDを削除しました。\n新しいラズパイIDを入力してください。")
+
 
     line_bot_api.reply_message(
         event.reply_token,
