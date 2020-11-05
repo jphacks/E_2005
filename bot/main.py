@@ -30,7 +30,7 @@ def raspi():
 
     for user in target_users:
         line_bot_api.push_message(
-            user.user_id,
+            user.line_id,
             TextSendMessage(text=content)
         )
 
@@ -56,23 +56,23 @@ def callback():
 @handler.add(MessageEvent)
 def handle_message(event):
     event_type = event.source.type
-    if (event_type == 'user'):
+    if event_type == 'user':
         sender_id = event.source.user_id
 
-    elif (event_type == 'group'):
+    elif event_type == 'group':
         sender_id = event.source.group_id
 
-    elif (event_type == 'room'):
+    elif event_type == 'room':
         sender_id = event.source.room_id
 
-    sender = Status.query.filter_by(user_id=sender_id).one()
+    sender = Status.query.filter_by(line_id=sender_id).one()
 
     print(sender_id)
-    if (sender.user_status == 0):
-        if (event.message.text == "登録"):
+    if sender.line_status == 0:
+        if event.message.text == "登録":
             status = 1
             message = TextSendMessage(text="使用者の名前とラズパイIDを「、」区切りで入力してください\n(例)おばあちゃん、12345")
-        elif (event.message.text == "削除"):
+        elif event.message.text == "削除":
             status = 2
             message = TextSendMessage(text="削除したいラズパイIDを入力してください")
         else:
@@ -81,7 +81,7 @@ def handle_message(event):
 
     elif (sender.user_status == 1):
         raspi = event.message.text.split('、')
-        new_user = User(user_id=sender_id, raspi_name=raspi[0], raspi_id=raspi[1])
+        new_user = User(line_id=sender_id, user_name=raspi[0], raspi_id=raspi[1])
         db.session.add(new_user)
         db.session.commit()
 
@@ -90,36 +90,8 @@ def handle_message(event):
 
     else:
         return
-    # elif (sender.user_status == 2):
 
-    # db_user = User.query.filter_by(user_id=sender_id).all()
-    # if (db_user == []):
-    #     new_user = User(user_id=sender_id, raspi_id=event.message.text)
-    #     db.session.add(new_user)
-    #     db.session.commit()
-
-    #     message = TextSendMessage(text="ラズパイIDを登録しました")
-    #     print(User.query.all())
-
-    # else:
-    #     user = User.query.filter(User.user_id==sender_id).one()
-    #     print(user)
-    #     message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
-
-    if event.message.text == "bye":
-        User.query.filter(User.user_id==sender_id).delete()
-        db.session.commit()
-
-        if event_type == 'group':
-            line_bot_api.leave_group(sender_id)
-            return
-        elif event_type == 'room':
-            line_bot_api.leave_room(sender_id)
-            return
-        elif event_type == 'user':
-            message = TextSendMessage(text="ラズパイIDを削除しました。\n新しいラズパイIDを入力してください。")
-
-    sender.user_status = status
+    sender.line_status = status
     db.session.commit()
 
     line_bot_api.reply_message(
@@ -129,7 +101,7 @@ def handle_message(event):
 
 @handler.add(FollowEvent)
 def handle_follow(event):
-    status = Status(user_id=event.source.user_id, user_status=0)
+    status = Status(line_id=event.source.user_id, line_status=0)
     db.session.add(status)
     db.session.commit()
 
@@ -143,15 +115,15 @@ def handle_follow(event):
 def handle_join(event):
     event_type = event.source.type
     if (event_type == 'group'):
-        status = Status(user_id=event.source.group_id, user_status=0)
+        status = Status(line_id=event.source.group_id, line_status=0)
 
     elif (event_type == 'room'):
-        status = Status(user_id=event.source.room_id, user_status=0)
+        status = Status(line_id=event.source.room_id, line_status=0)
 
     db.session.add(status)
     db.session.commit()
 
-    message = TextSendMessage(text="ラズパイIDを入力してください")
+    message = TextSendMessage(text="こんにちは")
     line_bot_api.reply_message(
         event.reply_token,
         message
