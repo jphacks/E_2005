@@ -65,7 +65,11 @@ def handle_message(event):
     elif (event_type == 'room'):
         sender_id = event.source.room_id
 
+    sender = Status.query.filter_by(user_id=sender_id).one()
+
     print(sender_id)
+    if (sender.user_status == 0):
+        message = TextSendMessage(text="通常メッセージ")
 
     db_user = User.query.filter_by(user_id=sender_id).all()
     if (db_user == []):
@@ -94,7 +98,6 @@ def handle_message(event):
         elif event_type == 'user':
             message = TextSendMessage(text="ラズパイIDを削除しました。\n新しいラズパイIDを入力してください。")
 
-
     line_bot_api.reply_message(
         event.reply_token,
         message
@@ -102,6 +105,10 @@ def handle_message(event):
 
 @handler.add(FollowEvent)
 def handle_follow(event):
+    status = Status(user_id=event.source.user_id, user_status=0)
+    db.session.add(status)
+    db.session.commit()
+
     message = TextSendMessage(text="ラズパイIDを入力してください")
     line_bot_api.reply_message(
         event.reply_token,
@@ -110,6 +117,16 @@ def handle_follow(event):
 
 @handler.add(JoinEvent)
 def handle_join(event):
+    event_type = event.source.type
+    if (event_type == 'group'):
+        status = Status(user_id=event.source.group_id, user_status=0)
+
+    elif (event_type == 'room'):
+        status = Status(user_id=event.source.room_id, user_status=0)
+
+    db.session.add(status)
+    db.session.commit()
+
     message = TextSendMessage(text="ラズパイIDを入力してください")
     line_bot_api.reply_message(
         event.reply_token,
