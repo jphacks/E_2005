@@ -22,6 +22,20 @@ LINE_CHANNEL_SECRET = os.environ["LINE_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
+@app.route("/raspi", methods=['POST'])
+def raspi():
+    raspi_id = request.json['raspi_id']
+    content = request.json['content']
+    target_users = User.query.filter_by(raspi_id=raspi_id).all()
+
+    for user in target_users:
+        line_bot_api.push_message(
+            user.user_id,
+            TextSendMessage(text=content)
+        )
+
+    return 'OK'
+
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
