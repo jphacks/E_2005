@@ -82,6 +82,8 @@ def handle_message(event):
             text = "登録しているラズパイ一覧\n"
             for raspi in raspis:
                 text += ("名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id + "\n")
+
+            status = 0
             message = TextSendMessage(text=text)
 
         else:
