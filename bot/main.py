@@ -135,7 +135,7 @@ def handle_message(event):
         text = event.message.text + "は登録されていません"
 
         for raspi in raspis:
-            if raspi.raspi_id == event.message.text
+            if raspi.raspi_id == event.message.text:
                 User.query.filter(User.raspi_id==event.message.text).delete()
                 db.session.commit()
                 text = event.message.text + "を削除しました"
