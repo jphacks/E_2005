@@ -71,17 +71,24 @@ def handle_message(event):
     if (sender.user_status == 0):
         if (event.message.text == "登録"):
             status = 1
-            message = TextSendMessage(text="ラズパイIDを入力してください")
+            message = TextSendMessage(text="使用者の名前とラズパイIDを「、」区切りで入力してください\n(例)おばあちゃん、12345")
+        elif (event.message.text == "削除"):
+            status = 2
+            message = TextSendMessage(text="削除したいラズパイIDを入力してください")
         else:
+            status = 0
             message = TextSendMessage(text="通常メッセージ")
 
     elif (sender.user_status == 1):
-        new_user = User(user_id=sender_id, raspi_id=event.message.text)
+        raspi = event.message.text.split('、')
+        new_user = User(user_id=sender_id, raspi_name=raspi[0], raspi_id=raspi[1])
         db.session.add(new_user)
         db.session.commit()
 
         status = 0
-        message = TextSendMessage(text="ラズパイIDを登録しました")
+        message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
+
+    elif (sender.user_status == 2):
 
     # db_user = User.query.filter_by(user_id=sender_id).all()
     # if (db_user == []):
@@ -109,6 +116,9 @@ def handle_message(event):
             return
         elif event_type == 'user':
             message = TextSendMessage(text="ラズパイIDを削除しました。\n新しいラズパイIDを入力してください。")
+
+    sender.user_status = status
+    db.session.commit()
 
     line_bot_api.reply_message(
         event.reply_token,
