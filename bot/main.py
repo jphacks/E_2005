@@ -69,21 +69,33 @@ def handle_message(event):
 
     print(sender_id)
     if (sender.user_status == 0):
-        message = TextSendMessage(text="通常メッセージ")
+        if (event.message.text == "登録"):
+            status = 1
+            message = TextSendMessage(text="ラズパイIDを入力してください")
+        else:
+            message = TextSendMessage(text="通常メッセージ")
 
-    db_user = User.query.filter_by(user_id=sender_id).all()
-    if (db_user == []):
+    elif (sender.user_status == 1):
         new_user = User(user_id=sender_id, raspi_id=event.message.text)
         db.session.add(new_user)
         db.session.commit()
 
+        status = 0
         message = TextSendMessage(text="ラズパイIDを登録しました")
-        print(User.query.all())
 
-    else:
-        user = User.query.filter(User.user_id==sender_id).one()
-        print(user)
-        message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
+    # db_user = User.query.filter_by(user_id=sender_id).all()
+    # if (db_user == []):
+    #     new_user = User(user_id=sender_id, raspi_id=event.message.text)
+    #     db.session.add(new_user)
+    #     db.session.commit()
+
+    #     message = TextSendMessage(text="ラズパイIDを登録しました")
+    #     print(User.query.all())
+
+    # else:
+    #     user = User.query.filter(User.user_id==sender_id).one()
+    #     print(user)
+    #     message = TextSendMessage(text="ラズパイIDは"+user.raspi_id+"です。")
 
     if event.message.text == "bye":
         User.query.filter(User.user_id==sender_id).delete()
