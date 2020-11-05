@@ -117,8 +117,12 @@ def handle_message(event):
         message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
 
     elif sender.line_status == 2:
+        message = TextSendMessage(text=event.message.text + "を削除しました")
+        
         User.query.filter(User.raspi_id==event.message.text).delete()
         db.session.commit()
+
+        status = 0
 
     else:
         return
