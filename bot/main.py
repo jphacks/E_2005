@@ -74,7 +74,6 @@ def handle_message(event):
             message = TextSendMessage(text="使用者の名前とラズパイIDを「、」区切りで入力してください\n(例)おばあちゃん、12345")
 
         elif event.message.text == "削除":
-            status = 2
             text="削除したいラズパイIDを入力してください\n"
             raspis = User.query.filter_by(line_id=sender_id).all()
 
@@ -85,6 +84,7 @@ def handle_message(event):
                 for raspi in raspis:
                     text += ("\n名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id)
 
+            status = 2
             message = TextSendMessage(text=text)
 
         elif event.message.text == "確認":
@@ -131,12 +131,17 @@ def handle_message(event):
         message = TextSendMessage(text="名前:" + raspi[0] + "\nラズパイID:" + raspi[1] + "\nで登録されました")
 
     elif sender.line_status == 2:
-        message = TextSendMessage(text=event.message.text + "を削除しました")
-        
-        User.query.filter(User.raspi_id==event.message.text).delete()
-        db.session.commit()
+        raspis = User.query.filter_by(line_id=sender_id).all()
+        text = event.message.text + "は登録されていません"
+
+        for raspi in raspis:
+            if raspi.raspi_id == event.message.text
+                User.query.filter(User.raspi_id==event.message.text).delete()
+                db.session.commit()
+                text = event.message.text + "を削除しました"
 
         status = 0
+        message = TextSendMessage(text=text)
 
     else:
         return
