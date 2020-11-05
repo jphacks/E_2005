@@ -79,9 +79,13 @@ def handle_message(event):
 
         elif event.message.text == "確認":
             raspis = User.query.filter_by(line_id=sender_id).all()
-            text = "登録しているラズパイ一覧"
-            for raspi in raspis:
-                text += ("\n名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id)
+
+            if raspis == []:
+                text = "登録しているラズパイはありません"
+            else:
+                text = "登録しているラズパイ一覧"
+                for raspi in raspis:
+                    text += ("\n名前:" + raspi.user_name + " ラズパイID:" + raspi.raspi_id)
 
             status = 0
             message = TextSendMessage(text=text)
@@ -103,7 +107,7 @@ def handle_message(event):
             text = "ラズパイIDを登録したいときは「登録」\n確認したいときは「確認」\n削除したいときは「削除」"
             if event_type == 'group' or event_type == 'room':
                 text += "\n退会させたい時は「バイバイ」"
-            text = "\nと入力してください"
+            text += "\nと入力してください"
 
             message = TextSendMessage(text=text)
 
