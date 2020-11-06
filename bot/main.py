@@ -15,6 +15,7 @@ from linebot.models import (
     TextSendMessage
 )
 import os
+import random, string
 
 #環境変数取得
 LINE_CHANNEL_ACCESS_TOKEN = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
@@ -38,6 +39,9 @@ def get_words_dict_from_db(tags):
 
     return tag_words
 
+def randomname(n):
+   return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
+
 @app.route("/raspi", methods=['POST'])
 def raspi():
     raspi_id = request.json['raspi_id']
@@ -45,6 +49,7 @@ def raspi():
     target_users = User.query.filter_by(raspi_id=raspi_id).all()
     tags = ["money", "job", "situation", "promise", "person"]
     tag_counts = {"money": 0, "job": 0, "situation": 0, "promise": 0, "person": 0}
+    pass_key = randomname(10)
 
     tag_words = get_words_dict_from_db(tags)
     words = wakati(text)
@@ -54,14 +59,25 @@ def raspi():
             if word in words:
                 tag_counts[tag] += 1
 
-    content = ""
+    score_content = ""
     for tag, count in tag_counts.items():
-        content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
+        score_content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
+
+    new_call = Call(raspi_id=raspi_id, text=text, key=pass_key)
+    db.session.add(new_call)
+    db.session.commit()
+
+    fb_content = "https://fraud-checker-test.herokuapp.com/feedback/" + pass_key
 
     for user in target_users:
         line_bot_api.push_message(
             user.line_id,
-            TextSendMessage(text=content)
+            TextSendMessage(text=score_content)
+        )
+
+        line_bot_api.push_message(
+            user.line_id,
+            TextSendMessage(text=fb_content)
         )
 
     return 'OK'
