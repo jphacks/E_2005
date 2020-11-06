@@ -1,6 +1,7 @@
 from flask import Flask, request, abort
 from bot import app, db
 from bot.models import User, Status
+from bot.wakati import wakati
 
 from linebot import (
     LineBotApi,
@@ -22,11 +23,40 @@ LINE_CHANNEL_SECRET = os.environ["LINE_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
+def convert_skull_from_num(num):
+    msg = ""
+    for i in num:
+        msg += "☠"
+    return msg
+
+def get_words_dict_from_db(tags):
+    tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
+    for tag in tags:
+        whole_words = Whole.query.filter_by(tag = tag).all()
+        for word in whole_words:
+            tag_words[tag].append(word.word)
+
+    return tag_words
+
 @app.route("/raspi", methods=['POST'])
 def raspi():
     raspi_id = request.json['raspi_id']
-    content = request.json['content']
+    text = request.json['content']
     target_users = User.query.filter_by(raspi_id=raspi_id).all()
+    tags = ["money", "job", "situation", "promise", "person"]
+    tag_counts = {"money": 0, "job": 0, "situation": 0, "promise": 0, "person": 0}
+
+    tag_words = get_words_dict_from_db(tags)
+    words = wakati(text)
+
+    for tag in tags:
+        for word in tags_words[tag]:
+            if word in words:
+                tag_counts[tag] += 1
+
+    content = ""
+    for tag, count in tag_counts.items():
+        content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
 
     for user in target_users:
         line_bot_api.push_message(
