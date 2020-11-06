@@ -10,6 +10,7 @@ google-cloud-speech = "*"
 mecab-python3 = "*"
 unidic-lite = "*"
 requests = "*"
+pyaudio = "*"
 
 [requires]
 python_version = "3.8"
