@@ -9,6 +9,7 @@ verify_ssl = true
 google-cloud-speech = "*"
 mecab-python3 = "*"
 unidic-lite = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
