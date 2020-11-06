@@ -1,42 +1,84 @@
-DEVICE_INDEX = 0
-CHUNK = 1024
-FORMAT = pyaudio.paInt16 # 16bit
-CHANNELS = 1             # monaural
-RATE = 44100             # sampling frequency [Hz]
+import pyaudio
+import wave
+def record():
+    chunk = 8194
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 1
+    #サンプリングレート
+    RATE = 44100
+    p = pyaudio.PyAudio()
+    stream = p.open(
+        format = FORMAT,
+        channels = CHANNELS,
+        rate = RATE,
+        input = True,
+        frames_per_buffer = chunk
+    )
+    print("=====RECORD START=====")
+    all = []
+    while True:
+        try:
+            data = stream.read(chunk)
+            all.append(data)
+        except KeyboardInterrupt:
+            break
+    print("=====RECORD END=====")
+    stream.close()
+    p.terminate()
+    data = b''.join(all)
+    #保存するファイル名、wは書き込みモード
+    out = wave.open('proken.wav','w')
+    out.setnchannels(1)
+    out.setsampwidth(2)
+    out.setframerate(RATE)
+    out.writeframes(data)
+    out.close()
 
-time = 5 # record time [s]       
-output_path = "proken.wav"
+def transcribe_file():
+    from google.cloud import speech
+    import io
+    client = speech.SpeechClient()
 
-p = pyaudio.PyAudio()
+    with io.open('proken.wav', 'rb') as audio_file:
+        content = audio_file.read()
 
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                input_device_index = DEVICE_INDEX,
-                frames_per_buffer=CHUNK)
+    audio = speech.RecognitionAudio(content=content)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=44100,
+        language_code='ja-JP',
+        #audio_channel_count=2,
+        enable_separate_recognition_per_channel=True
+    )
 
-print("recording ...")
+    operation = client.long_running_recognize(
+        request={"config": config, "audio": audio}
+    )
+    operation = client.long_running_recognize(config=config, audio=audio)
+    response = operation.result(timeout=90)
 
-frames = []
+    with io.open("proken.txt", "w", encoding="utf-8") as f:
+        for result in response.results:
+            f.write(u'{}'.format(result.alternatives[0].transcript))
 
-while True:
-    try:
-        data = stream.read(CHUNK)
-        frames.append(data)
-    except KeyboardInterrupt:
-        break
-        
-        
-print("done.")
+def send_push_message():
+    import requests
+    import json
+    import io
 
-stream.stop_stream()
-stream.close()
-p.terminate()
+    with io.open('proken.txt', 'r') as f:
+        content = f.read()
+        f.close()
 
-wf = wave.open(output_path, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
+    url = 'https://fraud-checker-test.herokuapp.com/raspi'
+    headers =  {'Content-Type': 'application/json'}
+    payload = {'raspi_id': 'jphacks-e2005-kokokatu', 'content': content}
+
+    res = requests.post(url, data=json.dumps(payload), headers=headers)
+    print(res)
+
+if __name__ == '__main__':
+    record()
+    transcribe_file()
+    send_push_message()
+
