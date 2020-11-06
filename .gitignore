@@ -2,3 +2,5 @@ google-service.json
 .env
 *.wav
 *.txt
+*.db
+__pycache__

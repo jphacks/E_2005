@@ -11,6 +11,10 @@ mecab-python3 = "*"
 unidic-lite = "*"
 requests = "*"
 pyaudio = "*"
+flask = "*"
+line-bot-sdk = "*"
+flask-sqlalchemy = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.8"
