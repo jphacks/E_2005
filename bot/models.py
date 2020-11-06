@@ -34,7 +34,8 @@ class Part(db.Model):
 
     def __repr__(self):
         return "<word={self.word} tag={self.tag} raspi_id={self.raspi_id}>".format(self=self)
-class Call(db.Model)
+
+class Call(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     raspi_id = db.Column(db.Text)
     text = db.Column(db.Text)
