@@ -79,7 +79,7 @@ def raspi():
     db.session.add(new_call)
     db.session.commit()
 
-    fb_content = "https://5c2194e255d3.ngrok.io/feedback/" + pass_key
+    fb_content = "https://fraud-checker-test.herokuapp.com/feedback/" + pass_key
 
     for user in target_users:
         line_bot_api.push_message(
