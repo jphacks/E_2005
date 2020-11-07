@@ -1,6 +1,7 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_templates, redirect, url_for
 from bot import app, db
-from bot.models import User, Status
+from bot.models import User, Status, Whole, Call
+from bot.wakati import wakati
 
 from linebot import (
     LineBotApi,
@@ -14,6 +15,7 @@ from linebot.models import (
     TextSendMessage
 )
 import os
+import random, string
 
 #環境変数取得
 LINE_CHANNEL_ACCESS_TOKEN = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
@@ -22,19 +24,78 @@ LINE_CHANNEL_SECRET = os.environ["LINE_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
+def convert_skull_from_num(num):
+    msg = ""
+    num = 3 if num > 3 else num
+    for i in range(num):
+        msg += "☠"
+    return msg.ljust(3, "・")
+
+def get_words_dict_from_db(tags):
+    tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
+    for tag in tags:
+        whole_words = Whole.query.filter_by(tag = tag).all()
+        for word in whole_words:
+            tag_words[tag].append(word.word)
+
+    return tag_words
+
+def randomname(n):
+   return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
+
 @app.route("/raspi", methods=['POST'])
 def raspi():
     raspi_id = request.json['raspi_id']
-    content = request.json['content']
+    text = request.json['content']
     target_users = User.query.filter_by(raspi_id=raspi_id).all()
+    tags = ["money", "job", "situation", "promise", "person"]
+    tag_counts = {"money": 0, "job": 0, "situation": 0, "promise": 0, "person": 0}
+    tag_jpname = {"money": "お金に関して", "job": "職に関して", "situation": "状況に関して", "promise": "約束、取引に関して", "person": "人物、家族に関して"}
+    pass_key = randomname(10)
+
+    tag_words = get_words_dict_from_db(tags)
+    words = wakati(text)
+
+    for tag in tags:
+        for word in tag_words[tag]:
+            if word in words:
+                tag_counts[tag] += 1
+
+    score_content = target_users[0].user_name + "さんに電話がかかってきました\n\n"
+
+    sum_count = sum(tag_counts.values())
+    score_content += "危険度:" + str(int((sum_count / 15) * 100)) + "%\n以下のような危険性があります\n\n"
+
+    for tag, count in tag_counts.items():
+        score_content += tag_jpname[tag] + "\n" + convert_skull_from_num(count) + "\n\n"
+    score_content = score_content[:-2] # 改行を抜く
+
+    new_call = Call(raspi_id=raspi_id, text=text, key=pass_key)
+    db.session.add(new_call)
+    db.session.commit()
+
+    fb_content = "https://fraud-checker-test.herokuapp.com/feedback/" + pass_key
 
     for user in target_users:
         line_bot_api.push_message(
             user.line_id,
-            TextSendMessage(text=content)
+            TextSendMessage(text=score_content)
+        )
+
+        line_bot_api.push_message(
+            user.line_id,
+            TextSendMessage(text=fb_content)
         )
 
     return 'OK'
+
+@app.route('/feedback/<key>', methods=['GET', 'POST'])
+def feedback(key):
+    if request.method == 'GET':
+        call = Call.query.filter_by(key=key).first()
+        print(call)
+
+        return render_templates(feedback.html)
 
 @app.route("/callback", methods=['POST'])
 def callback():
