@@ -29,7 +29,7 @@ def convert_skull_from_num(num):
     num = 3 if num > 3 else num
     for i in range(num):
         msg += "☠"
-    return msg.ljust(3, "_")
+    return msg.ljust(3, "●")
 
 def get_words_dict_from_db(tags):
     tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
@@ -60,7 +60,7 @@ def raspi():
             if word in words:
                 tag_counts[tag] += 1
 
-    score_content = "{user.user_name}さんに電話がかかってきました\n以下のような危険性があります"
+    score_content = user.user_name + "さんに電話がかかってきました\n以下のような危険性があります\n"
     for tag, count in tag_counts.items():
         score_content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
 
