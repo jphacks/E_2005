@@ -69,7 +69,7 @@ def raspi():
 
     sum_count = sum(tag_counts.values())
     score = 10 if sum_count > 10 else sum_count
-    score_content += "危険度:" + str(score) + "%\n以下のような危険性があります\n\n"
+    score_content += "危険度:" + str(score * 10) + "%\n以下のような危険性があります\n\n"
 
     for tag, count in tag_counts.items():
         score_content += tag_jpname[tag] + "\n" + convert_skull_from_num(count) + "\n\n"
