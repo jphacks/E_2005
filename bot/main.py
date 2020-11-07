@@ -1,6 +1,6 @@
-from flask import Flask, request, abort, render_templates, redirect, url_for
+from flask import Flask, request, abort, render_template, redirect, url_for
 from bot import app, db
-from bot.models import User, Status, Whole, Call
+from bot.models import User, Status, Whole, Call, Part
 from bot.wakati import wakati
 
 from linebot import (
@@ -31,12 +31,16 @@ def convert_skull_from_num(num):
         msg += "☠"
     return msg.ljust(3, "・")
 
-def get_words_dict_from_db(tags):
+def get_words_dict_from_db(tags, raspi_id):
     tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
     for tag in tags:
         whole_words = Whole.query.filter_by(tag = tag).all()
         for word in whole_words:
             tag_words[tag].append(word.word)
+
+    for part in Part.query.filter_by(raspi_id=raspi_id).all():
+        if part.word not in tag_words[part.tag]:
+            tag_words[part.tag].append(part.word)
 
     return tag_words
 
@@ -53,7 +57,7 @@ def raspi():
     tag_jpname = {"money": "お金に関して", "job": "職に関して", "situation": "状況に関して", "promise": "約束、取引に関して", "person": "人物、家族に関して"}
     pass_key = randomname(10)
 
-    tag_words = get_words_dict_from_db(tags)
+    tag_words = get_words_dict_from_db(tags, raspi_id)
     words = wakati(text)
 
     for tag in tags:
@@ -74,7 +78,7 @@ def raspi():
     db.session.add(new_call)
     db.session.commit()
 
-    fb_content = "https://fraud-checker-test.herokuapp.com/feedback/" + pass_key
+    fb_content = "https://5c2194e255d3.ngrok.io/feedback/" + pass_key
 
     for user in target_users:
         line_bot_api.push_message(
@@ -91,11 +95,39 @@ def raspi():
 
 @app.route('/feedback/<key>', methods=['GET', 'POST'])
 def feedback(key):
+    call = Call.query.filter_by(key=key).first()
     if request.method == 'GET':
-        call = Call.query.filter_by(key=key).first()
-        print(call)
+        detect_words = set(wakati(call.text))
 
-        return render_templates(feedback.html)
+        danger_words = []
+
+        for whole_word in Whole.query.all():
+            danger_words.append(whole_word.word)
+
+        for part_word in Part.query.filter_by(raspi_id=call.raspi_id).all():
+            danger_words.append(part_word.word)
+        
+        detect_danger_words = []
+        non_detect_words = []
+        for word in detect_words:
+            if word in danger_words:
+                detect_danger_words.append(word)
+
+            else:
+                non_detect_words.append(word)
+        
+        print(call)
+        return render_template('feedback.html', d = detect_danger_words, n = non_detect_words, key = key)
+
+    else:
+        word = request.form['word']
+        tag = request.form['tag']
+        print(word, tag)
+        new_part = Part(raspi_id=call.raspi_id, word=word, tag=tag)
+        db.session.add(new_part)
+        db.session.commit()
+
+        return 'Thank You'
 
 @app.route("/callback", methods=['POST'])
 def callback():
