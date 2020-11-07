@@ -29,7 +29,7 @@ def convert_skull_from_num(num):
     num = 3 if num > 3 else num
     for i in range(num):
         msg += "☠"
-    return msg.ljust(3, "●")
+    return msg.ljust(3, "・")
 
 def get_words_dict_from_db(tags):
     tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
@@ -50,6 +50,7 @@ def raspi():
     target_users = User.query.filter_by(raspi_id=raspi_id).all()
     tags = ["money", "job", "situation", "promise", "person"]
     tag_counts = {"money": 0, "job": 0, "situation": 0, "promise": 0, "person": 0}
+    tag_jpname = {"money": "お金に関して", "job": "職に関して", "situation": "状況に関して", "promise": "約束、取引に関して", "person": "人物、家族に関して"}
     pass_key = randomname(10)
 
     tag_words = get_words_dict_from_db(tags)
@@ -60,9 +61,14 @@ def raspi():
             if word in words:
                 tag_counts[tag] += 1
 
-    score_content = user.user_name + "さんに電話がかかってきました\n以下のような危険性があります\n"
+    score_content = target_users[0].user_name + "さんに電話がかかってきました\n\n"
+
+    sum_count = sum(tag_counts.values())
+    score_content += "危険度:" + str(int((sum_count / 15) * 100)) + "%\n以下のような危険性があります\n\n"
+
     for tag, count in tag_counts.items():
-        score_content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
+        score_content += tag_jpname[tag] + "\n" + convert_skull_from_num(count) + "\n\n"
+    score_content = score_content[:-2] # 改行を抜く
 
     new_call = Call(raspi_id=raspi_id, text=text, key=pass_key)
     db.session.add(new_call)
