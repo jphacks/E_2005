@@ -1,6 +1,6 @@
 from flask import Flask, request, abort
 from bot import app, db
-from bot.models import User, Status
+from bot.models import User, Status, Whole, Call
 from bot.wakati import wakati
 
 from linebot import (
@@ -26,9 +26,10 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def convert_skull_from_num(num):
     msg = ""
-    for i in num:
+    num = 3 if num > 3 else num
+    for i in range(num):
         msg += "☠"
-    return msg
+    return msg.ljust(3, "_")
 
 def get_words_dict_from_db(tags):
     tag_words = {"money": [], "job": [], "situation": [], "promise": [], "person": []}
@@ -55,11 +56,11 @@ def raspi():
     words = wakati(text)
 
     for tag in tags:
-        for word in tags_words[tag]:
+        for word in tag_words[tag]:
             if word in words:
                 tag_counts[tag] += 1
 
-    score_content = ""
+    score_content = "{user.user_name}さんに電話がかかってきました\n以下のような危険性があります"
     for tag, count in tag_counts.items():
         score_content += tag + "\n" + convert_skull_from_num(count) + "\n\n"
 
