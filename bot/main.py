@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, render_template, redirect, url_for
+from flask import Flask, request, abort, render_templates, redirect, url_for
 from bot import app, db
 from bot.models import User, Status, Whole, Call
 from bot.wakati import wakati
@@ -95,7 +95,7 @@ def feedback(key):
         call = Call.query.filter_by(key=key).first()
         print(call)
 
-        return render_template(feedback.html)
+        return render_templates(feedback.html)
 
 @app.route("/callback", methods=['POST'])
 def callback():
