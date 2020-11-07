@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<center>
+<div class='card'>
+<h1>フィードバック</h1>
+
+<h2>検出した危険ワード</h2>
+{% for word in d %}
+<h3>{{word}}</h3>
+{% endfor %}
+<h2>その他の検出ワード</h2>
+{% for word in n %}
+<h3>{{word}}</h3>
+{% endfor %}
+
+<select name='tag' form='feedback'>
+<option value='money'>お金に関して</option>
+<option value='job'>職に関して</option>
+<option value='situation'>状況に関して</option>
+<option value='promise'>約束・取引に関して</option>
+<option value='person'>人物・家族に関して</option>
+</select>
+
+<form method='POST' id='feedback'>
+<input type='text' name='word'></input>
+<input type='submit' value='送信'></input>
+</form>
+</div>
+</center>
