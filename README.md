@@ -26,8 +26,8 @@ https://www.npa.go.jp/bureau/criminal/souni/tokusyusagi/hurikomesagi_toukei2019.
 ### 今後の展望
 技術的な展望は以下の通り。
 
-* 現在外部のマイクから音を拾っているが、受話器に直接接続を行う
-* 解析の精度上昇
+* 現在外部のマイクから音を拾っているが、受話器から直接音声データを拾得する。
+* 危険度測定の精度を向上させる。
 
 ### 注力したこと（こだわり等）
 * 
@@ -35,6 +35,7 @@ https://www.npa.go.jp/bureau/criminal/souni/tokusyusagi/hurikomesagi_toukei2019.
 
 ## 開発技術
 ### 活用した技術
+* python 
 #### API・データ
 * Google Cloud Speech-to-Text
 * 
