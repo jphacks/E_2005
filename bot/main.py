@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_templatei, redirect, url_for
 from bot import app, db
 from bot.models import User, Status, Whole, Call
 from bot.wakati import wakati
@@ -82,6 +82,11 @@ def raspi():
         )
 
     return 'OK'
+
+@app.route('/feedback/<key>', methods=['GET', 'POST'])
+def feedback(key):
+    if request.method == 'GET':
+        return render_template(feedback.html)
 
 @app.route("/callback", methods=['POST'])
 def callback():
