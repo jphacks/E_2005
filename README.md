@@ -1,6 +1,7 @@
 # 詐欺チェッカー
 
-[![IMAGE ALT TEXT HERE](https://d.kuku.lu/578dbf9f64)](https://youtu.be/7Tp2uuxSwVc)
+[![製品のデモ動画](https://uploda2.ysklog.net/add840ff1c9ff2d81bc3bf2a992f6f7a.jpg
+)](https://youtu.be/7Tp2uuxSwVc)
 
 
 
